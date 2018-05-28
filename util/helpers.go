@@ -14,6 +14,9 @@ import (
 type APIHelpers interface {
 
 	// GetNode returns the Kubernetes node on which this container is running.
+	ListNode(*k8sclient.Clientset) (*api.NodeList, error)
+
+	// GetNode returns the Kubernetes node on which this container is running.
 	GetNode(*k8sclient.Clientset, string) (*api.Node, error)
 
 	// AddLabelsAnnotations modifies the supplied node's labels and annotations collection.
@@ -39,6 +42,20 @@ func Getk8sClientHelper(config *rest.Config) (APIHelpers, *k8sclient.Clientset) 
 		fmt.Println("Error while creating k8s client")
 	}
 	return helper, cli
+}
+
+//ListNode returns node API based on nodename
+func (h K8sHelpers) ListNode(cli *k8sclient.Clientset) (*api.NodeList, error) {
+	//fmt.Println("Got node name as ", NodeName)
+	// Get the node object using the node name
+	nodeList, err := cli.Core().Nodes().List(metav1.ListOptions{})
+	//nodeList, err := cli.Core().Nodes().List()
+	if err != nil {
+		fmt.Println("can't get node list: %s", err.Error())
+		return nil, err
+	}
+
+	return nodeList, nil
 }
 
 //GetNode returns node API based on nodename

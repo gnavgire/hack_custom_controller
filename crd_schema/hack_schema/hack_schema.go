@@ -16,7 +16,7 @@ import (
 const (
 	HackPlural   string = "hackcrds"
 	HackSingular string = "hackcrd"
-	HackKind     string = "HackCrd"
+	HackKind     string = "Hackcrd"
 	HackGroup    string = "hack.aricent.com"
 	HackVersion  string = "v1beta1"
 )
@@ -37,39 +37,27 @@ type hackclient struct {
 type Hackcrd struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
-	Spec               Hackspec
+	Spec               Hackspec `json:"Spec"`
 }
-
-/*
-type HostList struct {
-	Hostname             string `json:"hostName"`
-	Hacklabel             HackLabel  `json:"hacklabel"`
-}
-
-type HackLabel struct {
-	HostList []HostList `json:"hostList"`
-}
-
-*/
 
 type Hackspec struct {
-	hackLabel map[string]string `json:"hackLabel"`
+	HackLabel 	map[string]string `json:"HackLabel"`
 }
 
-type HackCrdList struct {
+type HackcrdList struct {
 	meta_v1.TypeMeta `json:",inline"`
 	meta_v1.ListMeta `json:"metadata"`
 	Items            []Hackcrd `json:"items"`
 }
 
 // Create a  Rest client with the new CRD Schema
-var SchemeGroupVersion = schema.GroupVersion{Group: CITTLGroup, Version: CITTLVersion}
+var SchemeGroupVersion = schema.GroupVersion{Group: HackGroup, Version: HackVersion}
 
 //addKnownTypes adds the set of types defined in this package to the supplied scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&Hackcrd{},
-		&HackCrdList{},
+		&HackcrdList{},
 	)
 	meta_v1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
@@ -100,3 +88,12 @@ func NewHackClient(cfg *rest.Config) (*rest.RESTClient, *runtime.Scheme, error) 
 func (f *hackclient) NewHKListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(f.cl, f.plural, f.ns, fields.Everything())
 }
+
+func (f *hackclient) Create(obj *Hackcrd) (*Hackcrd, error) {
+        var result Hackcrd
+        err := f.cl.Post().
+                Namespace(f.ns).Resource(f.plural).
+                Body(obj).Do().Into(&result)
+        return &result, err
+}
+

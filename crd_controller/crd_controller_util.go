@@ -1,12 +1,11 @@
 package crd_controller
 
 import (
-	"cit_custom_controller/util"
+	"hack_custom_controller/util"
 	"fmt"
 	"time"
 	//"github.com/golang/glog"
-	geo_schema "cit_custom_controller/crd_schema/cit_geolocation_schema"
-	trust_schema "cit_custom_controller/crd_schema/cit_trust_schema"
+	hack_schema "hack_custom_controller/crd_schema/hack_schema"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	clientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -90,6 +89,7 @@ func waitForEstablishedCRD(client clientset.Interface, name string) error {
 //TO-DO: get node name from hack object
 //apply label from hackSpec
 //getHackObjLabel creates lables and annotations map based on Hack CRD
+/*
 func getHackObjLabel(obj hack_schema.HostList) (util.Labels, util.Annotations) {
 	var lbl = make(util.Labels, 2)
 	var annotation = make(util.Annotations, 1)
@@ -99,25 +99,26 @@ func getHackObjLabel(obj hack_schema.HostList) (util.Labels, util.Annotations) {
 
 	return lbl, annotation
 }
+*/
 
-//AddHackTabObj Handler for addition event of the TL CRD
-func AddHackTabObj(obj interface{}, helper util.APIHelpers, cli *k8sclient.Clientset) {
+//UpdateHackTabObj Handler for addition event of the TL CRD
+func UpdateHackTabObj(obj interface{}, helper util.APIHelpers, cli *k8sclient.Clientset) {
 	myobj := obj.(*hack_schema.Hackcrd)
-	//fmt.Println("cast event name ", myobj.Name)
-	for index, ele := range myobj.Spec.HostList {
-		nodeName := myobj.Spec.HostList[index].Hostname
-		node, err := helper.GetNode(cli, nodeName)
-		if err != nil {
-			fmt.Println("failed to get node: %s", err.Error())
-			return
-		}
-		lbl, ann := getTlObjLabel(ele)
-		helper.AddLabelsAnnotations(node, lbl, ann)
-		err = helper.UpdateNode(cli, node)
-		if err != nil {
-			fmt.Println("can't update node: %s", err.Error())
-			return
-		}
+	fmt.Println("cast event name ", myobj.Name)
+
+	//nodeList, err := helper.ListNode(cli) 
+	node, err := helper.GetNode(cli, myobj.Name)
+	if err != nil {
+		fmt.Println("failed to get node: %s", err.Error())
+		return
+	}
+
+	lbl := myobj.Spec.HackLabel 
+	ann := map[string]string{"Gnaesh_annotate" : "fortimebeing"}
+	helper.AddLabelsAnnotations(node, lbl, ann)
+	err = helper.UpdateNode(cli, node)
+	if err != nil {
+		fmt.Println("can't update node: %s", err.Error())
+		return
 	}
 }
-

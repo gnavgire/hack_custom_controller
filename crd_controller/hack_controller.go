@@ -3,9 +3,9 @@ package crd_controller
 import (
          "fmt"
          "time"
-	"cit_custom_controller/util"
+	"hack_custom_controller/util"
         "github.com/golang/glog"
-	trust_schema "cit_custom_controller/crd_schema/cit_trust_schema"
+	"hack_custom_controller/crd_schema/hack_schema"
 	"k8s.io/client-go/rest"
         "k8s.io/apimachinery/pkg/util/wait"
         "k8s.io/apimachinery/pkg/util/runtime"
@@ -72,7 +72,7 @@ func (c *HackController) syncFromQueue(key string) error {
                 // Note that you also have to check the uid if you have a local controlled resource, which
                 // is dependent on the actual instance, to detect that a CRD object was recreated with the same name
                 fmt.Printf("Sync/Add/Update for CRD %#v \n", obj)
-		c.processTLQueue(key)
+		c.processHackQueue(key)
         }
         return nil
 }
@@ -155,7 +155,7 @@ func NewHKIndexerInformer(config *rest.Config, queue workqueue.RateLimitingInter
                         if err == nil {
                                 queue.Add(key)
                         }
-                	AddHackTabObj(obj, h_inf, cli) 
+                	//AddHackTabObj(obj, h_inf, cli) 
                 },
                 UpdateFunc: func(old interface{}, new interface{}) {
                         key, err := cache.MetaNamespaceKeyFunc(new)
@@ -163,7 +163,7 @@ func NewHKIndexerInformer(config *rest.Config, queue workqueue.RateLimitingInter
                         if err == nil {
                                 queue.Add(key)
                         }
-                	AddHackTabObj(new, h_inf, cli) 
+                	UpdateHackTabObj(new, h_inf, cli) 
                 },
                 DeleteFunc: func(obj interface{}) {
                         // IndexerInformer uses a delta queue, therefore for deletes we have to use this
