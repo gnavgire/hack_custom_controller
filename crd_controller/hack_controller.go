@@ -155,7 +155,7 @@ func NewHKIndexerInformer(config *rest.Config, queue workqueue.RateLimitingInter
                         if err == nil {
                                 queue.Add(key)
                         }
-                	//AddHackTabObj(obj, h_inf, cli) 
+                	AddHackTabObj(obj, h_inf, cli) 
                 },
                 UpdateFunc: func(old interface{}, new interface{}) {
                         key, err := cache.MetaNamespaceKeyFunc(new)

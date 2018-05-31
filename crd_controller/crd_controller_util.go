@@ -4,6 +4,7 @@ import (
 	"hack_custom_controller/util"
 	"fmt"
 	"time"
+	"regexp"
 	//"github.com/golang/glog"
 	hack_schema "hack_custom_controller/crd_schema/hack_schema"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -115,6 +116,30 @@ func UpdateHackTabObj(obj interface{}, helper util.APIHelpers, cli *k8sclient.Cl
 
 	lbl := myobj.Spec.HackLabel 
 	ann := map[string]string{"Gnaesh_annotate" : "fortimebeing"}
+	helper.AddLabelsAnnotations(node, lbl, ann)
+	err = helper.UpdateNode(cli, node)
+	if err != nil {
+		fmt.Println("can't update node: %s", err.Error())
+		return
+	}
+}
+
+//AddHackTabObj Handler for addition event of the TL CRD
+func AddHackTabObj(obj interface{}, helper util.APIHelpers, cli *k8sclient.Clientset) {
+	myobj := obj.(*hack_schema.Hackcrd)
+	fmt.Println("cast event name ", myobj.Name)
+
+	//nodeList, err := helper.ListNode(cli) 
+	re := regexp.MustCompile(`(\w+)-hack`)
+	nodeName := re.FindStringSubmatch(string(myobj.Name))
+	node, err := helper.GetNode(cli, nodeName[1])
+	if err != nil {
+		fmt.Println("failed to get node: %s", err.Error())
+		return
+	}
+
+	lbl := myobj.Spec.HackLabel 
+	ann := map[string]string{"Ganesh_ann" : "fortimebeing"}
 	helper.AddLabelsAnnotations(node, lbl, ann)
 	err = helper.UpdateNode(cli, node)
 	if err != nil {
